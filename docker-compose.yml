@@ -5,32 +5,72 @@ services:
     build: .
     container_name: jasperserver
     ports:
-      - "8080:8080"
+      - "${JRS_WEB_PORT}:8080"
     environment:
-      - DB_TYPE=postgresql
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=jasperserver
-      - DB_USER=jasper
-      - DB_PASSWORD=jasper
+      - DB_TYPE=${JRS_DB_TYPE}
+      - DB_HOST=${JRS_DB_HOST}
+      - DB_PORT=${JRS_DB_PORT}
+      - DB_NAME=${JRS_DB_NAME}
+      - DB_USER=${JRS_DB_USER}
+      - DB_PASSWORD=${JRS_DB_PASSWORD}
+    volumes:
+      - ./drivers:/usr/local/tomcat/lib
+      - ./config/default_master.properties:/usr/local/share/jasperreports/default_master.properties
+      - ./reports:/usr/local/share/jasperreports/reports
+      - ./scripts/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+    entrypoint: ["/usr/local/bin/docker-entrypoint.sh"]
     networks:
       report_net:
         ipv4_address: 192.168.128.10
-    volumes:
-      - ./reports:/opt/jasperserver/reports
 
+  # PostgreSQL service (active when using postgres)
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
-      POSTGRES_USER: jasper
-      POSTGRES_PASSWORD: jasper
-      POSTGRES_DB: jasperserver
+      POSTGRES_USER: ${JRS_DB_USER}
+      POSTGRES_PASSWORD: ${JRS_DB_PASSWORD}
+      POSTGRES_DB: ${JRS_DB_NAME}
     networks:
       report_net:
         ipv4_address: 192.168.128.11
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # MySQL service (uncomment if using MySQL)
+  # mysql:
+  #   image: mysql:8
+  #   container_name: mysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: ${JRS_DB_NAME}
+  #     MYSQL_USER: ${JRS_DB_USER}
+  #     MYSQL_PASSWORD: ${JRS_DB_PASSWORD}
+  #   networks:
+  #     report_net:
+  #       ipv4_address: 192.168.128.12
+  #   volumes:
+  #     - mysqldata:/var/lib/mysql
+
+  # MariaDB service (uncomment if using MariaDB)
+  # mariadb:
+  #   image: mariadb:11
+  #   container_name: mariadb
+  #   environment:
+  #     MARIADB_ROOT_PASSWORD: root
+  #     MARIADB_DATABASE: ${JRS_DB_NAME}
+  #     MARIADB_USER: ${JRS_DB_USER}
+  #     MARIADB_PASSWORD: ${JRS_DB_PASSWORD}
+  #   networks:
+  #     report_net:
+  #       ipv4_address: 192.168.128.13
+  #   volumes:
+  #     - mariadbdata:/var/lib/mysql
+
+volumes:
+  pgdata:
+  # mysqldata:
+  # mariadbdata:
 
 networks:
   report_net:
@@ -39,6 +79,3 @@ networks:
       config:
         - subnet: 192.168.128.0/20
           gateway: 192.168.128.1
-
-volumes:
-  pgdata:
