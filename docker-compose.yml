@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  jasperserver:
+    build: .
+    container_name: jasperserver
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_TYPE=postgresql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=jasperserver
+      - DB_USER=jasper
+      - DB_PASSWORD=jasper
+    networks:
+      report_net:
+        ipv4_address: 192.168.128.10
+    volumes:
+      - ./reports:/opt/jasperserver/reports
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: jasper
+      POSTGRES_PASSWORD: jasper
+      POSTGRES_DB: jasperserver
+    networks:
+      report_net:
+        ipv4_address: 192.168.128.11
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+networks:
+  report_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.128.0/20
+          gateway: 192.168.128.1
+
+volumes:
+  pgdata:
