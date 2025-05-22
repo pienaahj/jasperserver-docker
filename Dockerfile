@@ -17,11 +17,15 @@ ENV JRS_DB_TYPE=${JRS_DB_TYPE} \
     JRS_DB_USER=${JRS_DB_USER} \
     JRS_DB_PASSWORD=${JRS_DB_PASSWORD}
 
+# Create expected config dir
+RUN mkdir -p /usr/local/share/jasperreports/buildomatic
+
 # Copy JDBC drivers and setup scripts
 COPY drivers /usr/local/tomcat/lib
-COPY config/default_master.properties /usr/local/share/jasperreports/default_master.properties
+COPY config/default_master.properties /usr/local/share/jasperreports/buildomatic/default_master.properties
 COPY reports /usr/local/share/jasperreports/reports
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 
 # Install netcat and cleanup afterwards
 RUN apt-get update && \
