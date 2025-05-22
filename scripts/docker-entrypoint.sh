@@ -37,7 +37,7 @@ initialize_jasperserver() {
   esac
 
 
-  cp /usr/local/share/jasperreports/default_master.properties /usr/local/share/jasperreports/buildomatic/default_master.properties
+#   cp /usr/local/share/jasperreports/default_master.properties /usr/local/share/jasperreports/buildomatic/default_master.properties
 
   cd /usr/local/share/jasperreports/buildomatic
 
