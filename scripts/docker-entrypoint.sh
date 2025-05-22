@@ -24,18 +24,18 @@ wait_for_db() {
   exit 1
 }
 
-# Run JasperReports Server setup script
 initialize_jasperserver() {
-  echo "Initializing JasperReports Server with DB type '$DB_TYPE'..."
+  echo "Initializing JasperReports Server with DB type '$JRS_DB_TYPE'..."
 
-  case "$DB_TYPE" in
+  case "$JRS_DB_TYPE" in
     postgres|mysql|mariadb)
       ;;
     *)
-      echo "Unsupported DB_TYPE: $DB_TYPE"
+      echo "Unsupported JRS_DB_TYPE: $JRS_DB_TYPE"
       exit 1
       ;;
   esac
+
 
   cp /usr/local/share/jasperreports/default_master.properties /usr/local/share/jasperreports/buildomatic/default_master.properties
 

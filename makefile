@@ -64,3 +64,8 @@ check-env:
 			echo "Missing $$var in .env"; exit 1; \
 		fi; \
 	done
+# === Clean Docker Cache and Images ===
+clean:
+	@echo "🧹 Cleaning Docker build cache and dangling images..."
+	docker builder prune --force
+	docker image prune --force

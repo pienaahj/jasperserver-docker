@@ -23,6 +23,11 @@ COPY config/default_master.properties /usr/local/share/jasperreports/default_mas
 COPY reports /usr/local/share/jasperreports/reports
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
+# Install netcat and cleanup afterwards
+RUN apt-get update && \
+    apt-get install -y netcat-openbsd && \
+    rm -rf /var/lib/apt/lists/*
+
 # Set permissions and entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
