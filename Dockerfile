@@ -1,5 +1,3 @@
-# Dockerfile (modified)
-
 # Base image (required by Dockerfile spec)
 FROM tomcat:9-jdk17
 
