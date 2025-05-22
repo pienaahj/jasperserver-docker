@@ -33,6 +33,18 @@ up-mariadb:
 	@$(MAKE) switch-db DB=mariadb
 	@docker-compose --env-file .env up -d --build
 
+bake:
+	docker buildx bake
+
+bake-push:
+	docker buildx bake --push
+
+bake-arm:
+	docker buildx bake --set jasperserver.platform=linux/arm64
+
+bake-amd:
+	docker buildx bake --set jasperserver.platform=linux/amd64
+
 # Usage
 # make switch-db DB=postgres
 # make switch-db DB=mysql

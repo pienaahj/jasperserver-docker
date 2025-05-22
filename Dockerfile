@@ -1,27 +1,33 @@
-# syntax=docker/dockerfile:1.4
-FROM openjdk:8-jdk as base
+# Dockerfile (modified)
 
-ARG TIBCO_VERSION=7.9.1
-ARG INSTALLER_URL=https://sourceforge.net/projects/jasperserver/files/JasperServer/JasperReports%20Server%20Community%20$TIBCO_VERSION/TIB_js-jrs-cp_$TIBCO_VERSION_linux_x86_64.run/download
+# Base image (required by Dockerfile spec)
+FROM tomcat:9-jdk17
 
-RUN apt-get update && apt-get install -y wget unzip fontconfig ttf-dejavu-core libfontconfig1 libfreetype6 libx11-6 && \
-    mkdir /build && cd /build && \
-    wget -O installer.run "$INSTALLER_URL" && \
-    chmod +x installer.run && \
-    echo -e "n\nn\nn\nn\nn\nn\nn\nn\nn\nn\n" | ./installer.run
+# Accept build-time arguments with defaults to help linting tools and improve portability
+ARG JRS_DB_TYPE=postgres
+ARG JRS_DB_HOST=postgres
+ARG JRS_DB_PORT=5432
+ARG JRS_DB_NAME=jasperserver
+ARG JRS_DB_USER=jasper
+ARG JRS_DB_PASSWORD=jasper
 
-# Create final image
-FROM openjdk:8-jre-slim
+# Set environment variables from build arguments
+ENV JRS_DB_TYPE=${JRS_DB_TYPE} \
+    JRS_DB_HOST=${JRS_DB_HOST} \
+    JRS_DB_PORT=${JRS_DB_PORT} \
+    JRS_DB_NAME=${JRS_DB_NAME} \
+    JRS_DB_USER=${JRS_DB_USER} \
+    JRS_DB_PASSWORD=${JRS_DB_PASSWORD}
 
-COPY --from=base /build/jasperserver /opt/jasperserver
-COPY drivers/*.jar /opt/jasperserver/buildomatic/conf_source/db/drivers/
-COPY config/default_master.properties /opt/jasperserver/buildomatic/default_master.properties
-COPY scripts/docker-entrypoint.sh /entrypoint.sh
+# Copy JDBC drivers and setup scripts
+COPY drivers /usr/local/tomcat/lib
+COPY config/default_master.properties /usr/local/share/jasperreports/default_master.properties
+COPY reports /usr/local/share/jasperreports/reports
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-ENV PATH="/opt/jasperserver/apache-tomcat/bin:$PATH"
-WORKDIR /opt/jasperserver
+# Set permissions and entrypoint
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
-RUN chmod +x /entrypoint.sh
-
+# Expose web port
 EXPOSE 8080
-ENTRYPOINT ["/entrypoint.sh"]
